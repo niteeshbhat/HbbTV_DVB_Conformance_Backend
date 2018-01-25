@@ -234,6 +234,8 @@ int main(void)
     vg.higherindexRange=-1;
     vg.atomxml=false;
     vg.cmaf=false;
+    vg.dvb=false;
+    vg.hbbtv=false;
     //vg.indexRange='\0';
     vg.pssh_count = 0;
     vg.sencFound=false;
@@ -362,7 +364,11 @@ int main(void)
 			 vg.atomxml = true;
 		} else if ( keymatch( arg, "cmaf", 1)) {
 			 vg.cmaf = true;
-		}else {
+		} else if ( keymatch( arg, "dvb", 1)) {
+                         vg.dvb = true;
+                } else if ( keymatch( arg, "hbbtv", 1)) {
+                         vg.hbbtv = true;
+                } else {
 			fprintf( stderr, "Unexpected option \"%s\"\n", arg);
 			err = -1;
 			goto usageError;
@@ -613,7 +619,7 @@ int main(void)
 
 usageError:
 	fprintf( stderr, "Usage: %s [-filetype <type>] "
-								"[-printtype <options>] [-checklevel <level>] [-infofile <Segment Info File>] [-leafinfo <Leaf Info File>] [-segal] [-ssegal] [-startwithsap TYPE] [-level] [-bss] [-isolive] [-isoondemand] [-isomain] [-dynamic] [-dash264base] [-dashifbase] [-dash264enc] [-repIndex] [-atomxml] [-cmaf]", "ValidateMP4" );
+								"[-printtype <options>] [-checklevel <level>] [-infofile <Segment Info File>] [-leafinfo <Leaf Info File>] [-segal] [-ssegal] [-startwithsap TYPE] [-level] [-bss] [-isolive] [-isoondemand] [-isomain] [-dynamic] [-dash264base] [-dashifbase] [-dash264enc] [-repIndex] [-atomxml] [-cmaf] [-dvb] [-hbbtv]", "ValidateMP4" );
 	fprintf( stderr, " [-samplenumber <number>] [-verbose <options>] [-offsetinfo <Offset Info File>] [-logconsole ] [-help] inputfile\n" );
 	fprintf( stderr, "    -a[tompath]      <atompath> - limit certain operations to <atompath> (e.g. moov-1:trak-2)\n" );
 	fprintf( stderr, "                     this effects -checklevel and -printtype (default is everything) \n" );
@@ -659,6 +665,8 @@ usageError:
 	fprintf( stderr, "    -logconsole       Redirect stdout and stderr to stdout.txt and stderr.txt, respectively \n");
 	fprintf( stderr, "    -atomxml          Output the contents of each atom into an xml \n" );
 	fprintf( stderr, "    -cmaf             Check for CMAF conformance \n" );
+        fprintf( stderr, "    -dvb              Check for DVB conformance \n" );
+        fprintf( stderr, "    -hbbtv            Check for HbbTV conformance \n" );
 	fprintf( stderr, "    -h[elp] - print this usage message \n" );
 
 
