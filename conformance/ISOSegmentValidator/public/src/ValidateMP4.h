@@ -617,6 +617,8 @@ typedef struct {
     bool    RepresentationIndex;
     bool    atomxml;
     bool    cmaf;
+    bool    dvb;
+    bool    hbbtv;
     unsigned int  numControlTracks;
     unsigned int  *numControlLeafs;
     LeafInfo **controlLeafInfo;
