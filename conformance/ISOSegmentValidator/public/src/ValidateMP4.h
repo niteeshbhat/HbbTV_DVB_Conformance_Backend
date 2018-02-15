@@ -599,6 +599,10 @@ typedef struct {
     SInt64  bandwidth;
     unsigned int  width;
     unsigned int  height;
+    float framerate;
+    unsigned int codecprofile;
+    unsigned int codeclevel;
+    unsigned int codectier;
     argstr codecs;
     argstr indexRange;
     int lowerindexRange;
