@@ -2360,7 +2360,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 						//goto bail;
 					}
 				}
-				else if ((( sdh.sdType == 'hev1' ) || ( sdh.sdType == 'hvc1' )) && vg.cmaf)
+				else if ((( sdh.sdType == 'hev1' ) || ( sdh.sdType == 'hvc1' )) && (vg.cmaf || vg.dvb || vg.hbbtv))
 				{
 					if (entry->type == 'hvcC') {
 						BAILIFERR( Validate_hvcC_Atom( entry, refcon, (char *)"hvcC" ) );
