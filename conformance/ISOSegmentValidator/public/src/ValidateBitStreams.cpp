@@ -1784,6 +1784,13 @@ OSErr Validate_AVCConfigRecord( BitBuffer *bb, void *refcon )
 	avcHeader.level 		= GetBits(bb, 8, &err); if (err) goto bail;
 	atomprint("level=\"%d\"\n", avcHeader.level);
 	
+        if(vg.dvb || vg.hbbtv){
+            if(vg.codecprofile != avcHeader.profile)
+                errprint( "The codec profile is not matching with out of box codec profile value.\n");
+            if(vg.codeclevel != avcHeader.level)
+                errprint( "The codec level is not matching with out of box codec level value.\n");
+        }
+        
 	Validate_level_IDC(avcHeader.profile, avcHeader.level, constraint_set3_flag);
 
 	avcHeader.lengthsize = GetBits(bb, 8, &err); if (err) goto bail;
@@ -2217,6 +2224,12 @@ OSErr Validate_NAL_Unit(  BitBuffer *inbb, UInt8 expect_type, UInt32 nal_length 
 					
 					VALIDATE_FIELD  ("%d", num_units_in_tick, 32);
 					VALIDATE_FIELD  ("%d", time_scale, 32);
+                                        if(vg.dvb || vg.hbbtv){
+                                            float framerate = ((float)time_scale)/((float)(2*num_units_in_tick));
+                                            if(vg.framerate != framerate){
+                                                errprint( "The framerate is not matching with out of box framerate value.\n");
+                                            }
+                                        }
 					VALIDATE_FIELD  ("0x%01x", fixed_frame_rate_flag, 1);
 				}
 				VALIDATE_FIELD  ("0x%01x", nal_hrd_parameters_present_flag, 1);
@@ -2832,6 +2845,12 @@ OSErr Validate_NAL_Unit_HEVC(  BitBuffer *inbb, UInt8 expect_type, UInt32 nal_le
                                 if(vui_timing_info_present_flag){
                                     VALIDATE_FIELD  ("%d", vui_num_units_in_tick, 32);
                                     VALIDATE_FIELD  ("%d", vui_time_scale, 32);
+                                    if(vg.dvb || vg.hbbtv){
+                                        float framerate = ((float)vui_time_scale)/((float)(2*vui_num_units_in_tick));
+                                        if(vg.framerate != framerate){
+                                            errprint( "The framerate is not matching with out of box framerate value.\n");
+                                        }
+                                    }
                                     VALIDATE_FIELD  ("%d", vui_poc_proportional_to_timing_flag, 1);
                                     if(vui_poc_proportional_to_timing_flag)
                                         VALIDATE_UEV  ("%d", vui_num_ticks_poc_diff_one_minus1);
@@ -3868,6 +3887,13 @@ OSErr Validate_HEVCConfigRecord( BitBuffer *bb, void *refcon )
         
         hevcHeader.level_idc      = GetBits(bb, 8, &err); if (err) goto bail;
         atomprint("level_idc=\"%d\"\n",hevcHeader.level_idc);
+        
+        if(vg.dvb || vg.hbbtv){
+            if(vg.codecprofile != hevcHeader.profile_idc)
+                errprint( "The codec profile is not matching with out of box codec profile value.\n");
+            if(vg.codectier != hevcHeader.tier_flag || vg.codeclevel != hevcHeader.level_idc)
+                errprint( "The codec level is not matching with out of box codec level value.\n");
+        }
         
         hevcHeader.min_spatial_segmentation_idc      = GetBits(bb, 16, &err); if (err) goto bail;
         if ((hevcHeader.min_spatial_segmentation_idc & 0xF000) != 0xF000) {

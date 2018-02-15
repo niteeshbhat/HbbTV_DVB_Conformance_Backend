@@ -216,6 +216,8 @@ int main(void)
     vg.bandwidth = -1;
     vg.width = 0;
     vg.height = 0;
+    vg.framerate = 0;
+    vg.codecprofile = 0;
     vg.audioChValue = 0;
     vg.suggestBandwidth = false;
     vg.isoLive = false;
@@ -343,9 +345,33 @@ int main(void)
                           getNextArgStr( &temp, "width" ); vg.width = atoi(temp);
                 } else if ( keymatch( arg, "height", 6 ) ) {
                           getNextArgStr( &temp, "height" ); vg.height = atoi(temp);
-		} else if ( keymatch( arg, "codecs", 6 ) ) {
+		} else if ( keymatch( arg, "framerate", 9 ) ) {
+                          getNextArgStr( &temp, "framerate" );
+                          if(strstr(temp, "/")){
+                              char * pch;
+                              pch = strstr(temp, "/");
+                              strncpy (pch," ",1);
+                              puts(temp);
+                              
+                              char * pEnd;
+                              vg.framerate = strtof(temp, &pEnd)/strtof(pEnd, NULL);
+                          }
+                          else{
+                              vg.framerate = strtof(temp, NULL);
+                          }
+                } else if ( keymatch( arg, "codecs", 6 ) ) {
                           getNextArgStr( &vg.codecs, "codecs" ); 
-	        } else if ( keymatch( arg, "audiochvalue", 12 ) ) {
+	        } else if ( keymatch( arg, "codecprofile", 12 ) ) {
+                          getNextArgStr( &temp, "codecprofile" ); vg.codecprofile = atoi(temp);
+                } else if ( keymatch( arg, "codeclevel", 10 ) ) {
+                          getNextArgStr( &temp, "codeclevel" ); vg.codeclevel = atoi(temp);
+                } else if ( keymatch( arg, "codectier", 9 ) ) {
+                          getNextArgStr( &temp, "codectier" );
+                          if(strstr(temp, "L"))
+                              vg.codectier = 0;
+                          else if(strstr(temp, "H"))
+                              vg.codectier = 1;
+                } else if ( keymatch( arg, "audiochvalue", 12 ) ) {
                          getNextArgStr( &temp, "audiochvalue" ); vg.audioChValue = atoi(temp);
                  		  			  
 		} else if ( keymatch( arg, "default_kid", 11 ) ) { //Related to the case of encrypted content.
@@ -658,6 +684,10 @@ usageError:
 	fprintf( stderr, "    -indexrange       Byte range where sidx is expected\n");
 	fprintf( stderr, "    -width            Expected width of the video track\n");
 	fprintf( stderr, "    -height           Expected height of the video track\n");
+        fprintf( stderr, "    -framerate        Expected framerate of the video track\n");
+        fprintf( stderr, "    -codecprofile     Expected codec profile of the video track\n");
+        fprintf( stderr, "    -codectier        Expected codec tier of the video track\n");
+        fprintf( stderr, "    -codeclevel       Expected codec level of the video track\n");
 	fprintf( stderr, "    -default_kid      Expected default_KID for the mp4 content protection\n");
 	fprintf( stderr, "    -s[amplenumber]   <number> - limit sample checking or printing operations to sample <number> \n" );
 	fprintf( stderr, "                      most effective in combination with -atompath (default is all samples) \n" );
