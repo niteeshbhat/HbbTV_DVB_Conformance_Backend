@@ -2750,6 +2750,8 @@ OSErr Validate_trun_Atom( atomOffsetEntry *aoe, void *refcon )
 	if(vg.cmaf && trunInfo->data_offset_present != true){
 		errprint("CMAF check violated: Section 7.5.17. \"The data-offset-present flag SHALL be set to true\", found %d\n", trunInfo->data_offset_present);
 	}
+	if(vg.hbbtv && trunInfo->version ==0)
+            errprint("### HbbTV check violated: Section E.3.1.1. \"The track run box (trun) shall allow negative composition offsets in order to maintain audio visual presentation synchronization\", but unsigned offsets found \n");
     
     vg.tabcnt++;
     for(int i=0; i<trunInfo->sample_count; i++){

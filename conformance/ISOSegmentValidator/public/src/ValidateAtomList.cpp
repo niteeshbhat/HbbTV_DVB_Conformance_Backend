@@ -1854,7 +1854,10 @@ OSErr Validate_moof_Atom( atomOffsetEntry *aoe, void *refcon )
 
     if(vg.dashSegment && moofInfo->numTrackFragments == 0)
         errprint("Section 6.3.4.2. of ISO/IEC 23009-1:2012(E): 16: Each 'moof' box shall contain at least one track fragment.\n");
-        
+    if(vg.hbbtv && moofInfo->numTrackFragments != 1)
+        errprint("###HbbTV check violated Section E.3.1.1: 'The movie fragment boxx (moof) shall contain only one track fragment box(traf)', but found %d\n",moofInfo->numTrackFragments);
+
+    
     atomerr = ValidateAtomOfType( 'traf', 0, 
         Validate_traf_Atom, cnt, list, moofInfo );
     if (!err) err = atomerr;
