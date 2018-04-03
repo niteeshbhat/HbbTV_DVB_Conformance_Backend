@@ -2257,7 +2257,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 	atomprint("vRes=\"%s\"\n", fixedU32str(vsdi.vRes));
 	atomprint("dataSize=\"%ld\"\n", vsdi.dataSize);
 	atomprint("frameCount=\"%hd\"\n", vsdi.frameCount);
-	atomprint("name=\"%s\"\n", vsdi_name);
+	//atomprint("name=\"%s\"\n", vsdi_name);//This creates problems in xml printing and crashes Rep processing.
 	atomprint("depth=\"%hd\"\n", vsdi.depth);
 	atomprint("clutID=\"%hd\"\n", vsdi.clutID);
 	atomprint(">\n");
