@@ -3183,8 +3183,10 @@ OSErr Validate_sidx_Atom( atomOffsetEntry *aoe, void *refcon )
 
     tir = check_track(sidxInfo->reference_ID);
     
-    if(tir == 0)
+    if(tir == 0){
+        atomprint(">\n");
         return badAtomErr;
+    }
     
     
     atomprintnotab("\tversion=\"%d\" flags=\"%d\"\n", version, flags);
@@ -3250,7 +3252,7 @@ OSErr Validate_sidx_Atom( atomOffsetEntry *aoe, void *refcon )
     mir->processedSdixs++;
     
     atomprint("cumulatedDuration=\"%Lf\"\n", sidxInfo->cumulatedDuration);
-    atomprint(">\n");
+    //atomprint(">\n");
     vg.tabcnt++;
 	for ( i = 0; i < sidxInfo->reference_count; i++ ) {
 	    sampleprint("<subsegment subsegment_duration=\"%ld\"", sidxInfo->references[i].subsegment_duration);
@@ -3263,6 +3265,7 @@ OSErr Validate_sidx_Atom( atomOffsetEntry *aoe, void *refcon )
 	// All done
 	aoe->aoeflags |= kAtomValidated;
 bail:
+        atomprint(">\n");
 	return err;
 
 
@@ -3597,7 +3600,7 @@ OSErr Validate_ESDAtom( atomOffsetEntry *aoe, void *refcon, ValidateBitstreamPro
 	atomprint(">\n");
 	
 	// Get the ObjectDescriptor
-	atomprint("<%s>", esname); vg.tabcnt++;
+	//atomprint("<%s>", esname); vg.tabcnt++;
 	BAILIFERR( GetFileBitStreamDataToEndOfAtom( aoe, &esDataP, &esSize, offset, &offset ) );
 	
 	BitBuffer_Init(&bb, (UInt8 *)esDataP, esSize);
@@ -3608,13 +3611,14 @@ OSErr Validate_ESDAtom( atomOffsetEntry *aoe, void *refcon, ValidateBitstreamPro
 		err = tooMuchDataErr;
 	}
 		
-	--vg.tabcnt; atomprint("</%s>\n", esname);
+	//--vg.tabcnt; atomprint("</%s>\n", esname);
 	
 	// All done
 	aoe->aoeflags |= kAtomValidated;
-	--vg.tabcnt; atomprint("</ESD>\n");
+	
 	
 bail:
+        --vg.tabcnt; atomprint("</ESD>\n");
 	if (esDataP)
 		free(esDataP);
 
