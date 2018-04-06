@@ -2257,7 +2257,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 	atomprint("vRes=\"%s\"\n", fixedU32str(vsdi.vRes));
 	atomprint("dataSize=\"%ld\"\n", vsdi.dataSize);
 	atomprint("frameCount=\"%hd\"\n", vsdi.frameCount);
-	atomprint("name=\"%s\"\n", vsdi_name);
+	//atomprint("name=\"%s\"\n", vsdi_name);//This creates problems in xml printing and crashes Rep processing.
 	atomprint("depth=\"%hd\"\n", vsdi.depth);
 	atomprint("clutID=\"%hd\"\n", vsdi.clutID);
 	atomprint(">\n");
@@ -2745,6 +2745,8 @@ OSErr Validate_trun_Atom( atomOffsetEntry *aoe, void *refcon )
 	if(vg.cmaf && trunInfo->data_offset_present != true){
 		errprint("CMAF check violated: Section 7.5.17. \"The data-offset-present flag SHALL be set to true\", found %d\n", trunInfo->data_offset_present);
 	}
+	if(vg.hbbtv && trunInfo->version ==0)
+            errprint("### HbbTV check violated: Section E.3.1.1. \"The track run box (trun) shall allow negative composition offsets in order to maintain audio visual presentation synchronization\", but unsigned offsets found \n");
     
     vg.tabcnt++;
     for(int i=0; i<trunInfo->sample_count; i++){
@@ -3176,8 +3178,10 @@ OSErr Validate_sidx_Atom( atomOffsetEntry *aoe, void *refcon )
 
     tir = check_track(sidxInfo->reference_ID);
     
-    if(tir == 0)
+    if(tir == 0){
+        atomprint(">\n");
         return badAtomErr;
+    }
     
     
     atomprintnotab("\tversion=\"%d\" flags=\"%d\"\n", version, flags);
@@ -3243,7 +3247,7 @@ OSErr Validate_sidx_Atom( atomOffsetEntry *aoe, void *refcon )
     mir->processedSdixs++;
     
     atomprint("cumulatedDuration=\"%Lf\"\n", sidxInfo->cumulatedDuration);
-    atomprint(">\n");
+    //atomprint(">\n");
     vg.tabcnt++;
 	for ( i = 0; i < sidxInfo->reference_count; i++ ) {
 	    sampleprint("<subsegment subsegment_duration=\"%ld\"", sidxInfo->references[i].subsegment_duration);
@@ -3256,6 +3260,7 @@ OSErr Validate_sidx_Atom( atomOffsetEntry *aoe, void *refcon )
 	// All done
 	aoe->aoeflags |= kAtomValidated;
 bail:
+        atomprint(">\n");
 	return err;
 
 
@@ -3315,9 +3320,9 @@ OSErr Validate_soun_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 	atomprint(">\n"); //vg.tabcnt++; 
 
 	// Check required field values
-	FieldMustBeOneOf4( sdh.sdType, OSType, "SampleDescription sdType must be 'mp4a' or 'enca' or 'ac-4' or 'mha1' ", ( 'mp4a', 'enca','ac-4', 'mha1' ) );
+	FieldMustBeOneOf5( sdh.sdType, OSType, "SampleDescription sdType must be 'mp4a' or 'enca' or 'ac-4' or 'mha1' or 'ec-3' ", ( 'mp4a', 'enca','ac-4', 'mha1','ec-3' ) );
 	
-	if( (sdh.sdType != 'mp4a') && (sdh.sdType != 'enca') && (sdh.sdType != 'ac-4') && (sdh.sdType != 'mha1') && !fileTypeKnown ){	
+	if( (sdh.sdType != 'mp4a') && (sdh.sdType != 'enca') && (sdh.sdType != 'ac-4') && (sdh.sdType != 'mha1') && (sdh.sdType != 'ec-3') && !fileTypeKnown ){	
 			warnprint("WARNING: Don't know about this sound descriptor type \"%s\"\n", 
 				ostypetostr(sdh.sdType));
 			// goto bail;
@@ -3590,7 +3595,7 @@ OSErr Validate_ESDAtom( atomOffsetEntry *aoe, void *refcon, ValidateBitstreamPro
 	atomprint(">\n");
 	
 	// Get the ObjectDescriptor
-	atomprint("<%s>", esname); vg.tabcnt++;
+	//atomprint("<%s>", esname); vg.tabcnt++;
 	BAILIFERR( GetFileBitStreamDataToEndOfAtom( aoe, &esDataP, &esSize, offset, &offset ) );
 	
 	BitBuffer_Init(&bb, (UInt8 *)esDataP, esSize);
@@ -3601,13 +3606,14 @@ OSErr Validate_ESDAtom( atomOffsetEntry *aoe, void *refcon, ValidateBitstreamPro
 		err = tooMuchDataErr;
 	}
 		
-	--vg.tabcnt; atomprint("</%s>\n", esname);
+	//--vg.tabcnt; atomprint("</%s>\n", esname);
 	
 	// All done
 	aoe->aoeflags |= kAtomValidated;
-	--vg.tabcnt; atomprint("</ESD>\n");
+	
 	
 bail:
+        --vg.tabcnt; atomprint("</ESD>\n");
 	if (esDataP)
 		free(esDataP);
 

@@ -1100,6 +1100,7 @@ do { if ((num) != (value)) { err = badAtomErr; warnprint(errstr "\n", (value), n
 #define FieldList2(t1,t2) {t1,t2};
 #define FieldList3(t1,t2,t3) {t1,t2,t3};
 #define FieldList4(t1,t2,t3,t4) {t1,t2,t3,t4};
+#define FieldList5(t1,t2,t3,t4,t5) {t1,t2,t3,t4,t5};
 #define FieldList6(t1,t2,t3,t4,t5,t6){t1,t2,t3,t4,t5,t6};
 #define FieldList10(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10) {t1,t2,t3,t4,t5,t6,t7,t8,t9,t10};
 #define FieldList11(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11) {t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11};
@@ -1130,6 +1131,10 @@ do { if ((num) != (value)) { err = badAtomErr; warnprint(errstr "\n", (value), n
 #define FieldMustBeOneOf4( _value_, _valtype_, _errstr_, _list_ ) \
 	FieldOneOfBegin( _value_, _valtype_, _errstr_, _list_ ) \
 	FieldList4 _list_ \
+	FieldOneOfEnd( _value_, _valtype_, _errstr_, _list_ )
+#define FieldMustBeOneOf5( _value_, _valtype_, _errstr_, _list_ ) \
+	FieldOneOfBegin( _value_, _valtype_, _errstr_, _list_ ) \
+	FieldList5 _list_ \
 	FieldOneOfEnd( _value_, _valtype_, _errstr_, _list_ )
 #define FieldMustBeOneOf6( _value_, _valtype_, _errstr_, _list_ ) \
 	FieldOneOfBegin( _value_, _valtype_, _errstr_, _list_ ) \
