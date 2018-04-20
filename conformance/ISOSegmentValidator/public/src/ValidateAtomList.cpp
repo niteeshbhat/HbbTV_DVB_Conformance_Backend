@@ -418,14 +418,14 @@ OSErr Validate_minf_Atom( atomOffsetEntry *aoe, void *refcon )
 			case 'iphd':
 			case 'mjhd':
 				errprint("'%s' media type is reserved but not currently used\n", ostypetostr(entry->type));				
-				atomprint("<%s *****>\n",ostypetostr(entry->type));
-				atomprint("</%s>\n",ostypetostr(entry->type));
+				//atomprint("<%s *****>\n",ostypetostr(entry->type));
+				//atomprint("</%s>\n",ostypetostr(entry->type));
 				break;
 				
 			default:
 				warnprint("WARNING: unknown/unexpected atom '%s'\n",ostypetostr(entry->type));
-				atomprint("<%s *****>\n",ostypetostr(entry->type));
-				atomprint("</%s>\n",ostypetostr(entry->type));
+				//atomprint("<%s *****>\n",ostypetostr(entry->type));
+				//atomprint("</%s>\n",ostypetostr(entry->type));
 				break;
 		}
 		
