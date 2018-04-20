@@ -539,7 +539,7 @@ OSErr Validate_mdia_hdlr_Atom( atomOffsetEntry *aoe, void *refcon )
 	
 	// Get Handler Info Name
 	BAILIFERR( GetFileCString( aoe, &nameP, offset, aoe->maxOffset - offset, &offset ) );
-	atomprint("name=\"%s\"\n", nameP);
+	//atomprint("name=\"%s\"\n", nameP);
 
 	// Check required field values
 	FieldMustBe( hdlrInfo->componentType, 0, "'hdlr' componentType (reserved in mp4) must be %d not 0x%lx" );

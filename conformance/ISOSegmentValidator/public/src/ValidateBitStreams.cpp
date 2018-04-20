@@ -832,7 +832,7 @@ bail:
 OSErr Validate_SoundSpecificInfo(  BitBuffer *bb )
 {
 	OSErr err;
-	UInt8 ext_audioObjectType = 0, audioObjectType, sbr_present = -1;
+	UInt8 ext_audioObjectType = 0, audioObjectType, sbr_present = -1,temp_audioObjectType;
 	UInt8 ext_samplingFreqIndex, samplingFreqIndex;
 	UInt32 ext_samplingFreq, samplingFreq;
 	UInt8 channelConfig;
@@ -876,7 +876,8 @@ OSErr Validate_SoundSpecificInfo(  BitBuffer *bb )
 			VALIDATE_FIELD("%d",  ext_samplingFreq, 24);
 		}
 		else atomprint("comment%ld=\"freq is %s\"\n", counter++, freqs[ext_samplingFreqIndex]);
-		VALIDATE_FIELD("0x%02x",  audioObjectType, 5);
+		VALIDATE_FIELD("0x%02x",  temp_audioObjectType, 5);
+                audioObjectType=temp_audioObjectType;
 		if (audioObjectType<28) {
 			atomprint("comment%ld=\"audio is %s\"\n", counter++, audiotype[audioObjectType]);
 		}
