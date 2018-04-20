@@ -2261,7 +2261,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 	atomprint("depth=\"%hd\"\n", vsdi.depth);
 	atomprint("clutID=\"%hd\"\n", vsdi.clutID);
 	atomprint(">\n");
-		FieldMustBeOneOf6( sdh.sdType, OSType, "SampleDescription sdType must be 'mp4v', 'avc1', 'encv', 'hev1','hvc1', or 'vp09'", ('mp4v', 'avc1', 'encv', 'hev1','hvc1','vp09') );
+		FieldMustBeOneOf8( sdh.sdType, OSType, "SampleDescription sdType must be 'mp4v', 'avc1', 'avc3', 'avc4', 'encv', 'hev1','hvc1', or 'vp09'", ('mp4v', 'avc1', 'avc3', 'avc4', 'encv', 'hev1','hvc1','vp09') );
 		
 	FieldMustBe( sdh.resvd1, 0, "SampleDescription resvd1 must be %d not %d" );
 	FieldMustBe( sdh.resvdA, 0, "SampleDescription resvd1 must be %d not %d" );
@@ -3320,9 +3320,9 @@ OSErr Validate_soun_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 	atomprint(">\n"); //vg.tabcnt++; 
 
 	// Check required field values
-	FieldMustBeOneOf5( sdh.sdType, OSType, "SampleDescription sdType must be 'mp4a' or 'enca' or 'ac-4' or 'mha1' or 'ec-3' ", ( 'mp4a', 'enca','ac-4', 'mha1','ec-3' ) );
+	FieldMustBeOneOf9( sdh.sdType, OSType, "SampleDescription sdType must be 'mp4a' or 'enca' or 'ac-4' or 'mha1' or 'ec-3' or 'dtsc' or 'dtsh', 'dtse', 'dtsl' ", ( 'mp4a', 'enca','ac-4', 'mha1','ec-3','dtsc','dtsh','dtse','dtsl' ) );
 	
-	if( (sdh.sdType != 'mp4a') && (sdh.sdType != 'enca') && (sdh.sdType != 'ac-4') && (sdh.sdType != 'mha1') && (sdh.sdType != 'ec-3') && !fileTypeKnown ){	
+	if( (sdh.sdType != 'mp4a') && (sdh.sdType != 'enca') && (sdh.sdType != 'ac-4') && (sdh.sdType != 'mha1') && (sdh.sdType != 'ec-3') && (sdh.sdType != 'dtsc') && (sdh.sdType != 'dtsh') && (sdh.sdType != 'dtse') && (sdh.sdType != 'dtsl') && !fileTypeKnown ){	
 			warnprint("WARNING: Don't know about this sound descriptor type \"%s\"\n", 
 				ostypetostr(sdh.sdType));
 			// goto bail;
