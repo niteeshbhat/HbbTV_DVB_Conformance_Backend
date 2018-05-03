@@ -1064,6 +1064,7 @@ OSErr Validate_tref_sync_Atom( atomOffsetEntry *aoe, void *refcon );
 OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon );
 OSErr Validate_soun_SD_Entry( atomOffsetEntry *aoe, void *refcon );
 OSErr Validate_hint_SD_Entry( atomOffsetEntry *aoe, void *refcon );
+OSErr Validate_subt_SD_Entry( atomOffsetEntry *aoe, void *refcon );
 
 
 OSErr ValidateElementaryVideoStream( atomOffsetEntry *aoe, void *refcon );
@@ -1201,6 +1202,8 @@ OSErr Validate_avcC_Atom( atomOffsetEntry *aoe, void *refcon, char *esname );
 OSErr Validate_hvcC_Atom( atomOffsetEntry *aoe, void *refcon, char *esname );
 OSErr Validate_btrt_Atom( atomOffsetEntry *aoe, void *refcon, char *esname );
 OSErr Validate_m4ds_Atom( atomOffsetEntry *aoe, void *refcon, char *esname );
+
+OSErr Validate_stpp_Atom( atomOffsetEntry *aoe, void *refcon, char *esname );
 
 OSErr Validate_ftyp_Atom( atomOffsetEntry *aoe, void *refcon );
 OSErr Validate_styp_Atom( atomOffsetEntry *aoe, void *refcon );
