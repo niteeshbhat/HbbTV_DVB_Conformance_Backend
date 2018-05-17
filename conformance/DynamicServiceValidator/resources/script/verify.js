@@ -458,6 +458,48 @@ function dispatchChecks()
 }
 
 /*******************************************************************************************************************************
+Merge the high level information with the low level information.
+This is done for preventing the loss of possible extra information provided in higher layers.
+Lower level information takes precedence for the information provided for same functionalities.
+This holds for SegmentTemplate and SegmentTimeline existing on different levels in MPD.
+********************************************************************************************************************************/
+
+function hierarchyLevelInfoGathering(higherLevel, lowerLevel)
+{
+    if(higherLevel.SegmentTemplate != null){
+        var highSegmentTemplate = higherLevel.SegmentTemplate;
+        var highAttributes = highSegmentTemplate.attributes;
+        var highAttributesLen = highAttributes.length;
+        var i, j;
+        
+        if(lowerLevel.SegmentTemplate != null){
+            var lowSegmentTemplate = lowerLevel.SegmentTemplate;
+            var lowAttribute;
+            
+            for(i=0; i<highAttributesLen; i++){
+                lowAttribute = lowSegmentTemplate.getAttribute(highAttributes[i].nodeName);
+                if(!lowAttribute){
+                    var newAttribute = document.createAttribute(highAttributes[i].nodeName);
+                    newAttribute.value = highAttributes[i].nodeValue;
+                    lowerLevel.SegmentTemplate.attributes.setNamedItem(newAttribute);
+                }
+            }
+            
+            if(higherLevel.SegmentTemplate.getElementsByTagName("SegmentTimeline").length != 0){
+                var highSegmentTimeline = higherLevel.SegmentTemplate.getElementsByTagName("SegmentTimeline")[0];
+                
+                if(lowerLevel.SegmentTemplate.getElementsByTagName("SegmentTimeline").length == 0){
+                    lowerLevel.SegmentTemplate.appendChild(highSegmentTimeline);
+                }
+            }
+        }
+        else{
+            lowerLevel.SegmentTemplate = highSegmentTemplate;
+        }
+    }
+}
+
+/*******************************************************************************************************************************
 Generate URLs and availability times for segment timeline based template.
 ********************************************************************************************************************************/
 
@@ -651,7 +693,7 @@ function processSegmentTemplate(Representation, Period)
 Process all data pertaining a representation, mainly SAEs and SASs of all the segments for different addressing methods
 ********************************************************************************************************************************/
 
-function processRepresentation(Representation, Period)
+function processRepresentation(Representation, AdaptationSet, Period)
 {
     var id = Representation.xmlData.getAttribute('id');
 
@@ -666,6 +708,7 @@ function processRepresentation(Representation, Period)
     
     if( SegmentTemplate != null )
         Representation.SegmentTemplate = SegmentTemplate;
+    hierarchyLevelInfoGathering(AdaptationSet, Representation);
     
     var SegmentBase = getChildByTagName(Representation,"SegmentBase");
     
@@ -692,7 +735,8 @@ function processAdaptationSet(AdaptationSet,Period)
     
     if( SegmentTemplate != null )
         AdaptationSet.SegmentTemplate = SegmentTemplate;
-
+    hierarchyLevelInfoGathering(Period, AdaptationSet);
+    
     var SegmentBase = getChildByTagName(AdaptationSet,"SegmentBase");
     
     if( SegmentBase != null )
@@ -711,7 +755,7 @@ function processAdaptationSet(AdaptationSet,Period)
         AdaptationSet.Representations[repIndex].SegmentTemplate = AdaptationSet.SegmentTemplate;
         AdaptationSet.Representations[repIndex].SegmentBase = AdaptationSet.SegmentBase;
 
-        processRepresentation(AdaptationSet.Representations[repIndex],Period);
+        processRepresentation(AdaptationSet.Representations[repIndex],AdaptationSet,Period);
     }
 }
 
@@ -732,14 +776,8 @@ function processPeriod(Period)
     
     var numAdaptationSets = Period.xmlData.getElementsByTagName("AdaptationSet").length;
 
-    var r1=/[-+]?[0-9]*\.?[0-9]+/g; //sometimes they are in the form of "PT5M8S"
     if(Period.xmlData.getAttribute("start")){
-       var ps_string = Period.xmlData.getAttribute("start").match(r1);
-       var ps_len=ps_string.length; 
-
-       for(i=ps_len-1;i>=0;i--){
-          Period.PeriodStart=Period.PeriodStart+parseFloat(ps_string[i])*Math.pow(60,ps_len-i-1);
-       }
+       Period.PeriodStart = getTiming(Period.xmlData.getAttribute("start"));
     }	
 
     for(var asIndex = 0; asIndex < numAdaptationSets ; asIndex++)
@@ -760,21 +798,26 @@ function processPeriod(Period)
 function processMPD(MPDxmlData)
 {
     var numPeriods = MPDxmlData.getElementsByTagName("Period").length;
+    var currentPeriod = 0;
     
-    if(numPeriods > 1)
-        alert("Found " + numPeriods + "periods, current implementation will only handle the first one!");
-
+    if(numPeriods > 1){
+        currentPeriod = determineCurrentPeriod(MPD, periodInformation(MPD));
+        alert("Found " + numPeriods + "periods, current implementation will only handle Period " + currentPeriod + "!");
+    }
+    
     MPD.updatedSegments = 0;
 
     MPD.MUP = getMUP(MPD.xmlData);
+    
+    
 
-    for(var periodIndex = 0; periodIndex < 1/*numPeriods*/ ; periodIndex++) //Currently only first period
+    for(var periodIndex = 0; periodIndex < 1/*numPeriods*/; periodIndex++) //Currently only first period
     {
         if(MPD.Periods[periodIndex] == null)
             MPD.Periods[periodIndex] = {xmlData: null, PeriodStart: 0, id: "", SegmentTemplate: null, SegmentBase: null, AdaptationSets: new Array()};
 
         //Initializations
-        MPD.Periods[periodIndex].xmlData = MPDxmlData.getElementsByTagName("Period")[periodIndex];
+        MPD.Periods[periodIndex].xmlData = MPDxmlData.getElementsByTagName("Period")[currentPeriod];
         
         processPeriod(MPD.Periods[periodIndex]);
     }
@@ -795,6 +838,147 @@ function getChildByTagName(parent,tagName)
     }
 
     return null;
+}
+
+/******************************Determine Current Period******************************************/
+function determineCurrentPeriod(MPD, periodsInfo)
+{
+    var ast = new Date(MPD.xmlData.getAttribute("availabilityStartTime")).getTime();
+    var numPeriods = MPD.xmlData.getElementsByTagName("Period").length;
+    var starts = periodsInfo[0];
+    var durations = periodsInfo[1];
+    var timeNow = new Date();
+    var i;
+    
+    for(i=0; i<numPeriods; i++){
+        if((timeNow.getTime() > ast + starts[i]*1000) && (timeNow.getTime() < ast + starts[i]*1000 + durations[i]*1000))
+            return i;
+    }
+    
+    throw("According to timing, no period is available, exiting!");
+}
+
+function periodInformation(MPD)
+{
+    var periods = MPD.xmlData.getElementsByTagName("Period");
+    var numPeriods = periods.length;
+    
+    var returnInfo = new Array();
+    var starts = new Array();
+    var durations = new Array();
+    var period;
+    var start;
+    var duration;
+    var i;
+    
+    for(i=0; i<numPeriods; i++){
+        period = periods[i];
+        
+        // determine period start
+        if(period.getAttribute("start")){
+            start = getTiming(period.getAttribute("start"));
+        }
+        else{
+            if(i > 0){
+                if(periods[i-1].getAttribute("duration"))
+                    start = getTiming(starts[i-1]) + getTiming(periods[i-1].getAttribute("duration"));
+            }
+            else{
+                if(MPD.xmlData.getAttribute("type") == "static"){
+                    start = 0;
+                }
+            }
+        }
+        starts[i] = start;
+        
+        // determine period duration
+        if(i != numPeriods-1){
+            if(periods[i+1].getAttribute("start")){
+                duration = getTiming(periods[i+1].getAttribute("start")) - start;
+            }
+            else if(period.getAttribute("duration")){
+                duration = getTiming(period.getAttribute("duration"));
+            }
+        }
+        else{
+            var endTime;
+            if(MPD.xmlData.getAttribute("mediaPresentationDuration"))
+                endTime = getTiming(MPD.xmlData.getAttribute("mediaPresentationDuration"));
+            else if(period.getAttribute("duration"))
+                endTime = getTiming(period.getAttribute("duration"));
+            else if(MPD.xmlData.getAttribute("type") == "dynamic")
+                endTime = Number.POSITIVE_INFINITY;
+            else
+                throw("Must have @mediaPresentationDuratio on MPD or an explicit @duration on the last period, exiting!");
+            
+            duration = endTime - start;
+        }
+        durations[i] = duration;
+    }
+    
+    returnInfo[0] = starts;
+    returnInfo[1] = durations;
+    
+    return returnInfo;
+}
+
+/******************************Time Parsing******************************************/
+function getTiming(timeval)
+{
+    var movingIndex = timeval.indexOf("P")+1;
+    var Y = 0;
+    var M = 0;
+    var W = 0;
+    var D = 0;
+    var H = 0;
+    var Min = 0;
+    var S = 0;
+    
+    var year = timeval.indexOf("Y", movingIndex);
+    if(year != -1){
+        Y = timeval.substring(movingIndex, year);
+        movingIndex = year+1;
+    }
+    
+    var month = timeval.indexOf("M", movingIndex);
+    if(month != -1 && month < timeval.indexOf("T", movingIndex)){
+        M = timeval.substring(movingIndex, month);
+        movingIndex = month+1;
+    }
+    
+    var week = timeval.indexOf("W", movingIndex);
+    if(week != -1){
+        W = timeval.substring(movingIndex, week);
+        movingIndex = week+1;
+    }
+    
+    var day = timeval.indexOf("D", movingIndex);
+    if(day != -1){
+        D = timeval.substring(movingIndex, day);
+        movingIndex = day+1;
+    }
+    
+    movingIndex = timeval.indexOf("T", movingIndex)+1;
+    
+    var hour = timeval.indexOf("H", movingIndex);
+    if(hour != -1){
+        H = timeval.substring(movingIndex, hour);
+        movingIndex = hour+1;
+    }
+    
+    var minute = timeval.indexOf("M", movingIndex);
+    if(minute != -1){
+        Min = timeval.substring(movingIndex, minute);
+        movingIndex = minute+1;
+    }
+    
+    var second = timeval.indexOf("S", movingIndex);
+    if(second != -1){
+        S = timeval.substring(movingIndex, second);
+        movingIndex = second+1;
+    }
+    
+    return (Y*365*24*60*60 + M*30*24*60*60 + W*7*24*60*60 + D*24*60*60 + H*60*60 + Min*60 + S*1);
 }
 
 /******************************get MediaPresentationDuration******************************************/
@@ -871,11 +1055,12 @@ var r1=/[-+]?[0-9]*\.?[0-9]+/g;
 var tsbd=0;
 //s.match(r):object, Number(s.match(r)):number  
 if(mpd.getAttribute("timeShiftBufferDepth")){
-   var tsbd_string=mpd.getAttribute("timeShiftBufferDepth").match(r1);
-   var tsbd_len=tsbd_string.length;   
-   for(i=tsbd_len-1;i>=0;i--){
-	tsbd=tsbd+parseFloat(tsbd_string[i])*Math.pow(60,tsbd_len-i-1);
-   }
+//   var tsbd_string=mpd.getAttribute("timeShiftBufferDepth").match(r1);
+//   var tsbd_len=tsbd_string.length;   
+//   for(i=tsbd_len-1;i>=0;i--){
+//	tsbd=tsbd+parseFloat(tsbd_string[i])*Math.pow(60,tsbd_len-i-1);
+//   }
+    tsbd = getTiming(mpd.getAttribute("timeShiftBufferDepth"));
 }else{
    tsbd=veryLargeDuration;
 }
@@ -885,16 +1070,17 @@ return tsbd;
 
 // MPD@suggestedPresentationDelay, it is just a value
 function getSPD(mpd){
-var r1=/[-+]?[0-9]*\.?[0-9]+/g;
+//var r1=/[-+]?[0-9]*\.?[0-9]+/g;
 //Case 2:sometimes they are in the form of "PT7200S"
 var spd=0;
 //s.match(r):object, Number(s.match(r)):number  
 if(mpd.getAttribute("suggestedPresentationDelay")){
-   var spd_string=mpd.getAttribute("suggestedPresentationDelay").match(r1);
-   var spd_len=spd_string.length;   
-   for(i=spd_len-1;i>=0;i--){
-	spd=spd+parseFloat(spd_string[i])*Math.pow(60,spd_len-i-1);
-   }
+//   var spd_string=mpd.getAttribute("suggestedPresentationDelay").match(r1);
+//   var spd_len=spd_string.length;   
+//   for(i=spd_len-1;i>=0;i--){
+//	spd=spd+parseFloat(spd_string[i])*Math.pow(60,spd_len-i-1);
+//   }
+    spd = getTiming(mpd.getAttribute("suggestedPresentationDelay"));
 }else{
    spd=5;
 }
@@ -903,16 +1089,17 @@ return spd;
 
  //MPD@minimumUpdatePeriod, it is just a value
 function getMUP(mpd){
-var r1=/[-+]?[0-9]*\.?[0-9]+/g;
+//var r1=/[-+]?[0-9]*\.?[0-9]+/g;
 //Case 2:sometimes they are in the form of "PT7200S"
 var mup=0;
 //s.match(r):object, Number(s.match(r)):number  
 if(mpd.getAttribute("minimumUpdatePeriod")){
-   var mup_string=mpd.getAttribute("minimumUpdatePeriod").match(r1);
-   var mup_len=mup_string.length;   
-   for(i=mup_len-1;i>=0;i--){
-	mup=mup+parseFloat(mup_string[i])*Math.pow(60,mup_len-i-1);
-   }
+//   var mup_string=mpd.getAttribute("minimumUpdatePeriod").match(r1);
+//   var mup_len=mup_string.length;   
+//   for(i=mup_len-1;i>=0;i--){
+//	mup=mup+parseFloat(mup_string[i])*Math.pow(60,mup_len-i-1);
+//   }
+    mup = getTiming(mpd.getAttribute("minimumUpdatePeriod"));
 }else{
    mup=maxMUP;
 }
@@ -920,16 +1107,17 @@ return mup;
 }
 // MPD@minBufferTime, it is just a value
 function getMBT(mpd){
-var r1=/[-+]?[0-9]*\.?[0-9]+/g;
+//var r1=/[-+]?[0-9]*\.?[0-9]+/g;
 //Case 2:sometimes they are in the form of "PT7200S"
 var mbt=0;
 //s.match(r):object, Number(s.match(r)):number  
 if(mpd.getAttribute("minBufferTime")){
-   var mbt_string=mpd.getAttribute("minBufferTime").match(r1);
-   var mbt_len=mbt_string.length;   
-   for(i=mbt_len-1;i>=0;i--){
-	mbt=mbt+parseFloat(mbt_string[i])*Math.pow(60,mbt_len-i-1);
-   }
+//   var mbt_string=mpd.getAttribute("minBufferTime").match(r1);
+//   var mbt_len=mbt_string.length;   
+//   for(i=mbt_len-1;i>=0;i--){
+//	mbt=mbt+parseFloat(mbt_string[i])*Math.pow(60,mbt_len-i-1);
+//   }
+    mbt = getTiming(mpd.getAttribute("minBufferTime"));
 }else{
    mbt=10;
 }
