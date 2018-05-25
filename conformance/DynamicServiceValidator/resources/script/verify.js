@@ -400,15 +400,15 @@ function dispatchChecks()
                    try
             	   	{	
                         var currentSegment = Representation.Segments[i];
-                        currentSegment.SAS.deltaTime = Math.ceil(currentSegment.SAS.time.getTime()- now.getTime());
-                        currentSegment.SAE.deltaTime = Math.ceil(currentSegment.SAE.time.getTime() - saeCheckOffset - now.getTime());
+                        currentSegment.SAS.deltaTime = Math.ceil(currentSegment.SAS.time.getTime()- (now.getTime()+serverTimeOffset));
+                        currentSegment.SAE.deltaTime = Math.ceil(currentSegment.SAE.time.getTime() - saeCheckOffset - (now.getTime()+serverTimeOffset));
                         //printOutput("Index: " + i + ", SAS delta: " + currentSegment.SAS.deltaTime + ", SAE delta: " + currentSegment.SAE.deltaTime + "<br/>");
 
                         if(currentSegment.SAE.deltaTime >= 0)   //Still some time to expiry of segment
                         {
                             if(!currentSegment.SAS.requestDispatched)
                             {
-                                if(currentSegment.SAS.deltaTime > 0)  //Still some time to availabilty of segment
+                                if(currentSegment.SAS.deltaTime >= 0)  //Still some time to availabilty of segment
                                 {
                                     if(currentSegment.SAS.deltaTime < 2000)
                                     {
@@ -656,8 +656,8 @@ function processSegmentTemplate(Representation, Period)
         Representation.SSN = 1;
 
     // start to check from the start number, but we need to to calculate the GSN 
-    var LSN            = Math.floor((mpd.FT.getTime()                            - ( getAST(mpd.xmlData).getTime() + Period.PeriodStart*1000 ) - d*1000 )/ (d*1000) ) +  Representation.SSN;  
-    Representation.GSN = Math.ceil(( mpd.FT.getTime() + getMUP(mpd.xmlData)*1000 - ( getAST(mpd.xmlData).getTime() + Period.PeriodStart*1000 ) - d*1000 )/ (d*1000) ) +  Representation.SSN;
+    var LSN            = Math.floor((mpd.FT.getTime()     +serverTimeOffset                      - ( getAST(mpd.xmlData).getTime() + Period.PeriodStart*1000 ) - d*1000 )/ (d*1000) ) +  Representation.SSN;  
+    Representation.GSN = Math.ceil(( mpd.FT.getTime()+serverTimeOffset + getMUP(mpd.xmlData)*1000 - ( getAST(mpd.xmlData).getTime() + Period.PeriodStart*1000 ) - d*1000 )/ (d*1000) ) +  Representation.SSN;
     Representation.firstAvailableSsegment = Math.floor(Math.max(LSN - Math.ceil(getTSBD(mpd.xmlData)+d)/d - 100, Representation.SSN));
 
     var newSegmentCount = 0;
@@ -800,74 +800,79 @@ function processPeriod(Period)
 
 function getNTPServerTimeOffset(URLList)
 {
-     var ntpClient = require('ntp-client');
-     var clientTimestamp = Date.parse(new Date().toUTCString()); 
-     ntpClient.getNetworkTime("pool.ntp.org", 123, function(err, date) {
-     if(err) {
-        console.error(err);
-        URLList.shift(); // remove already used URL from the list and try next URL.
-        if(URLList.length>0)
-            getNTPServerTimeOffset(URLList);
-       // return;
-     }
-    else{
-        console.log("Current time : ");
-        console.log(date);
-        
-        var serverTimestamp=date;
-        var nowTimeStamp  = Date.parse(new Date().toUTCString());
-        serverTimeOffset = (serverTimestamp - ((nowTimeStamp-clientTimestamp)/2)-clientTimestamp);
-        serverTimeOffsetStatus=true;
+    var xhttpNTP = createXMLHttpRequestObject();
+    var clientTimestamp = Date.parse(new Date().toUTCString()); 
+    xhttpNTP.onreadystatechange = function() {
+    if (this.readyState == 4 ){
+        if(this.status == 200) {
+      
+            //console.log(this.responseText*1000);
+            var serverTimestamp=this.responseText*1000;
+            var nowTimeStamp  = Date.parse(new Date().toUTCString());
+            if(serverTimeOffsetStatus==false){
+                serverTimeOffset = (serverTimestamp - ((nowTimeStamp-clientTimestamp)/2)-clientTimestamp);
+                serverTimeOffsetStatus=true;
+            }
+            //console.log(serverTimeOffset);
+        }
+        else{
+            URLList.shift(); // remove already used URL from the list and try next URL.
+            if(URLList.length>0)
+                getNTPServerTimeOffset(URLList);
+        }
     }
-    });
+  };
+  xhttpNTP.open("GET", "resources/script/GetServerTime.php?host="+URLList[0], true);
+  xhttpNTP.send();
+
 }
 
-function getServerTimeOffset(URLList, method)
+function getServerTimeOffset(URLList, method,schema)
 {   
         var clientTimestamp = Date.parse(new Date().toUTCString()); 
-              console.log("clientTimestamp "+clientTimestamp)
-            var xmlhttp=createXMLHttpRequestObject();
+        var xmlhttp=createXMLHttpRequestObject();
       
-
-            xmlhttp.onreadystatechange = function(){
-                if (xmlhttp.readyState === 4) {
-                    if (xmlhttp.status === 200) {
-                        if(method== "HEAD")
-                            var serverDateStr = xmlhttp.getResponseHeader('Date');
-                        else
-                            var serverDateStr=xmlhttp.responseXML;
-                        
+        xmlhttp.onreadystatechange = function(){
+            if (xmlhttp.readyState === 4) {
+                if (xmlhttp.status === 200) {
+                    if(method== "HEAD"){
+                        var serverDateStr = xmlhttp.getResponseHeader('Date');
                         var serverTimestamp = Date.parse(new Date(Date.parse(serverDateStr)).toUTCString());
-                        console.log("serverTimestamp "+serverTimestamp);
-                   
-                        var nowTimeStamp  = Date.parse(new Date().toUTCString());
+                    }
+                    else{
+                        var xmlDocServer=xmlhttp.responseXML.documentElement;
+                        var message=xmlDocServer.getElementsByTagName("message");
+                        var serverDateStr=message[0].getAttribute("generated.on");
+                        if(schema=="urn:mpeg:dash:utc:http-ntp:2014")
+                            var serverTimestamp=serverDateStr*1000;
+                        else
+                            var serverTimestamp = Date.parse(new Date(Date.parse(serverDateStr)).toUTCString());
+    
+                    }                                                
+                    //console.log("serverTimestamp "+serverTimestamp);
+                    var nowTimeStamp  = Date.parse(new Date().toUTCString());
 
-            // Here http request and response times are assumed equal.
+                    // Here http request and response times are assumed equal.
+                    if(serverTimeOffsetStatus==false){
                         serverTimeOffset = (serverTimestamp - ((nowTimeStamp-clientTimestamp)/2)-clientTimestamp);
                         serverTimeOffsetStatus=true;
-
-                        //break;
-                        
-                    } else {
-                        console.error(xmlhttp.statusText);
-                        URLList.shift(); // remove already used URL from the list and try next URL.
-                        if(URLList.length>0)
-                            getServerTimeOffset(URLList, method);
-                        //continue;
+                        //console.log("serverTimeOffset "+serverTimeOffset);
                     }
+                    
+                } else {
+                    //console.error(xmlhttp.statusText);
+                    URLList.shift(); // remove already used URL from the list and try next URL.
+                    if(URLList.length>0)
+                        getServerTimeOffset(URLList, method);
+                     
                 }
-            };
-                  console.log(URLList[0]+ "?noCache=" + new Date().getTime())
-            if(method=="HEAD")
-                xmlhttp.open("HEAD", URLList[0],true);//+ "?noCache=" + new Date().getTime(), true);
-            else
-                xmlhttp.open("GET", URLList[0],true);
-            //xmlhttp.setRequestHeader("Date",Date.now());
-            xmlhttp.send(null);
-        
-        
-        
-
+            }
+        };
+        if(method=="HEAD")
+            xmlhttp.open("HEAD", URLList[0],true);
+        else
+            xmlhttp.open("GET", URLList[0],true);
+        xmlhttp.send(null);
 }
 
 function processUTCTiming(MPDxmlData)
@@ -892,42 +897,37 @@ function processUTCTiming(MPDxmlData)
 function UTCSchemesEvaluate(UTCElement){
     var URLList=UTCElement.value.split(" ");// Most of the UTC schemes give white space separated list.
     switch(UTCElement.scheme)
-            {
-            case "urn:mpeg:dash:utc:ntp:2014" :
-                getNTPServerTimeOffset(URLList);
-                break;
-            case "urn:mpeg:dash:utc:sntp:2014" :
-                getNTPServerTimeOffset(URLList);
-                break;
-            case "urn:mpeg:dash:utc:http-head:2014" : 
-                getServerTimeOffset(URLList,"HEAD");
-           
-                break;
-            case "urn:mpeg:dash:utc:http-xsdate:2014" :
-                getServerTimeOffset(URLList,"GET");
-
-                break;
-            case "urn:mpeg:dash:utc:http-iso:2014" : 
-                getServerTimeOffset(URLList,"GET");
-             
-                break;
-            case "urn:mpeg:dash:utc:http-ntp:2014" : 
-                getServerTimeOffset(URLList,"GET");
-          
-                break;
-            case "urn:mpeg:dash:utc:direct:2014" :
-                console.log(MPD.FT.getTime());
-                console.log(Date.parse(URLList[0]));
-                serverTimeOffset=Date.parse(URLList[0])-MPD.FT.getTime();
-                serverTimeOffsetStatus=true;
-                break;
-            }
-            if(serverTimeOffsetStatus==false)
-            {
-                UTCElementArray.shift(); // When first UTCTiming element did not respond, try the clock in the next element.
-                if(UTCElementArray.length>0)
-                    setTimeout(function(){UTCSchemesEvaluate(UTCElementArray[0]);},200);
-            }
+    {
+        case "urn:mpeg:dash:utc:ntp:2014" :
+            getNTPServerTimeOffset(URLList);
+            break;
+        case "urn:mpeg:dash:utc:sntp:2014" :
+            getNTPServerTimeOffset(URLList);
+            break;
+        case "urn:mpeg:dash:utc:http-head:2014" : 
+            getServerTimeOffset(URLList,"HEAD",UTCElement.scheme);        
+            break;
+        case "urn:mpeg:dash:utc:http-xsdate:2014" :
+            getServerTimeOffset(URLList,"GET",UTCElement.scheme);
+            break;
+        case "urn:mpeg:dash:utc:http-iso:2014" : 
+            getServerTimeOffset(URLList,"GET",UTCElement.scheme);
+            break;
+        case "urn:mpeg:dash:utc:http-ntp:2014" : 
+            getServerTimeOffset(URLList,"GET",UTCElement.scheme);
+            break;
+        case "urn:mpeg:dash:utc:direct:2014" :
+            serverTimeOffset=Date.parse(new Date(URLList[0]))-Date.parse(MPD.FT);
+            //console.log("serverTimeoffset"+serverTimeOffset);
+            serverTimeOffsetStatus=true;
+            break;
+    }
+    if(serverTimeOffsetStatus==false)
+    {
+        UTCElementArray.shift(); // When first UTCTiming element did not respond, try the clock in the next element.
+        if(UTCElementArray.length>0)
+            setTimeout(function(){UTCSchemesEvaluate(UTCElementArray[0]);},200);
+    }
                 
 }
 
@@ -940,7 +940,7 @@ function processMPD(MPDxmlData)
     
     if(numPeriods > 1){
         currentPeriod = determineCurrentPeriod(MPD, periodInformation(MPD));
-        alert("Found " + numPeriods + "periods, current implementation will only handle Period " + currentPeriod + "!");
+        //alert("Found " + numPeriods + "periods, current implementation will only handle Period " + currentPeriod + "!");
     }
     
     MPD.updatedSegments = 0;
