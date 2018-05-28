@@ -631,9 +631,9 @@ function processSegmentTemplate(Representation, Period)
     var init=Representation.SegmentTemplate.getAttribute("initialization");
     var media=Representation.SegmentTemplate.getAttribute("media");
 
-    if(media.indexOf("$Number$") == -1)
+    if(media.indexOf("$Number") == -1)
     {
-        alert("SegmentTemplate with no $Number$ not supported, exiting!");
+        alert("SegmentTemplate with no $Number$/$Number%[width]d$ not supported, exiting!");
         exit();
     }
     
@@ -667,7 +667,18 @@ function processSegmentTemplate(Representation, Period)
     var maxNewSeg = 0;
     
     do{
-        var urlObj = getBaseURL(mpd.xmlData)+((media.replace("$RepresentationID$",Representation.xmlData.getAttribute("id"))).replace("$Number$",num)).replace("$Bandwidth$",Representation.xmlData.getAttribute("bandwidth"));
+        var urlObj = getBaseURL(mpd.xmlData)+((media.replace("$RepresentationID$",Representation.xmlData.getAttribute("id")))).replace("$Bandwidth$",Representation.xmlData.getAttribute("bandwidth"));
+        //Replace Number%[width]d format
+        var str_$Number$ = urlObj.match(/\$(.*)\$/).pop();
+        var width_regex= /\d+/g;
+        var width = str_$Number$.match(width_regex);
+        if(width!=null){
+            var num_to_replace=new Intl.NumberFormat('en-IN', { minimumIntegerDigits: width ,useGrouping:false}).format(num);
+            urlObj=urlObj.replace("$"+str_$Number$+"$",num_to_replace);
+        }
+        else
+            urlObj=urlObj.replace("$Number$",num);
+        //
         var sasObj = {time: new Date((getAST(mpd.xmlData).getTime()+Period.PeriodStart*1000+(num-Representation.SSN)*d*1000)), deltaTime: 0, timeOutRet : 0, xmlHttp: null, requestDispatched: false, intrinsicDispatchTime: null, dispatchTimeOffset: null};
         var saeObj = {time: new Date((getAST(mpd.xmlData).getTime()+Period.PeriodStart*1000+(num-Representation.SSN)*d*1000)+getTSBD(mpd.xmlData)*1000), deltaTime: 0, timeOutRet : 0, xmlHttp: null, requestDispatched: false, intrinsicDispatchTime: null, dispatchTimeOffset: null};
 

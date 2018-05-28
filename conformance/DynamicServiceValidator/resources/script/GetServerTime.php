@@ -34,9 +34,6 @@ function ntp_time($host) {
 
 
 $host = $_REQUEST['host'];
-$f=fopen("test.txt","w");
-fwrite($f,$host);
-fclose($f);
 $timestamp = ntp_time($host);
  
 //$time = date('F j, Y, g:i a', $timestamp);
