@@ -989,6 +989,13 @@ OSErr Validate_mvex_Atom( atomOffsetEntry *aoe, void *refcon )
 	atomerr = ValidateAtomOfType( 'trex', kTypeAtomFlagMustHaveOne, 
 		Validate_trex_Atom, cnt, list, tir );
 	if (!err) err = atomerr;
+        
+        // Process 'trep' atoms
+        if(vg.dvb || vg.hbbtv){
+            atomerr = ValidateAtomOfType( 'trep', 0, 
+                    Validate_trep_Atom, cnt, list, tir );
+            if (!err) err = atomerr;
+        }
 
     /*Now check if any track information is missing*/
     for(i = 0 ; i < vg.mir->numTIRs ; i++)

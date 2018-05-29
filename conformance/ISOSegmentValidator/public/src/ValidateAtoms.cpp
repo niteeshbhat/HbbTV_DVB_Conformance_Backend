@@ -2492,6 +2492,34 @@ bail:
 
 //==========================================================================================
 
+
+OSErr Validate_trep_Atom( atomOffsetEntry *aoe, void *refcon )
+{
+	OSErr err = noErr;
+	UInt32 version;
+	UInt32 flags;
+	UInt64 offset;
+        UInt32 track_id;
+        
+	// Get version/flags
+	BAILIFERR( GetFullAtomVersionFlags( aoe, &version, &flags, &offset ) );
+        BAILIFERR( GetFileDataN32( aoe, &track_id, offset, &offset ) );
+        
+	atomprintnotab("\tversion=\"%d\" flags=\"%d\"\n", version, flags);
+	atomprint("track_id=\"%lld\"\n", track_id);
+	atomprint(">\n");
+        
+	// All done
+	aoe->aoeflags |= kAtomValidated;
+bail:
+	return err;
+
+
+}
+
+
+//==========================================================================================
+
 OSErr Validate_mfhd_Atom( atomOffsetEntry *aoe, void *refcon )
 {
 	OSErr err = noErr;

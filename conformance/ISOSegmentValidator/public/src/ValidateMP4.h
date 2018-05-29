@@ -1026,6 +1026,7 @@ OSErr Validate_subs_Atom( atomOffsetEntry *aoe, void *refcon );
 
 OSErr Validate_trex_Atom( atomOffsetEntry *aoe, void *refcon );
 OSErr Validate_mehd_Atom( atomOffsetEntry *aoe, void *refcon );
+OSErr Validate_trep_Atom( atomOffsetEntry *aoe, void *refcon );
 
 OSErr Validate_mfhd_Atom( atomOffsetEntry *aoe, void *refcon );
 OSErr Validate_tfhd_Atom( atomOffsetEntry *aoe, void *refcon );
