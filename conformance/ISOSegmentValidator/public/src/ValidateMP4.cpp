@@ -205,7 +205,7 @@ int main(void)
 //	vg.print_sample = true;
 //	vg.print_sampleraw = true;
 //	vg.print_hintpayload = true;
-    vg.visualProfileLevelIndication = 255;
+    //vg.visualProfileLevelIndication = 255;
     // this is simply the wrong place for this;  it's not a program parameter, it's the mpeg-4
     //   profile/level indication as found in the video stream.
     // But neither movie info nor track info are available at the right points.  Ugh [dws]
