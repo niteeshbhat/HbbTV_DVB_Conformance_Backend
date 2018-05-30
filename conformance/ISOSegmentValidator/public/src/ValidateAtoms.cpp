@@ -2277,7 +2277,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 	FieldMustBe( vsdi.dataSize, 0, "ImageDescription dataSize must be %d not %d" );
 	FieldMustBe( vsdi.frameCount, 1, "ImageDescription frameCount must be %d not %d" );
 	// should check the whole string
-	FieldMustBe( vsdi.name[0], 0, "ImageDescription name must be ''" );
+	FieldMustBe( vsdi.name[0], 0, "ImageDescription name must be '%d' not '%d'" );
 	FieldMustBe( vsdi.depth, 24, "ImageDescription depth must be %d not %d" );
 	FieldMustBe( vsdi.clutID, -1, "ImageDescription clutID must be %d not %d" );
 
