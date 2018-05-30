@@ -1028,7 +1028,7 @@ OSErr Validate_dref_Atom( atomOffsetEntry *aoe, void *refcon )
 					
 				default:
 				// �� should warn
-					warnprint("WARNING: unknown/unexpected dref entry '%s'\n",ostypetostr(entry->type));
+					warnprint("WARNING: In %s unknown/unexpected dref entry '%s'\n",vg.curatompath, ostypetostr(entry->type));
 					atomprint("???? />\n");
 					break;
 			}
@@ -2363,7 +2363,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 					}
 					else { 
 						err = badAtomErr;
-						warnprint("Warning: Unknown atom found \"%s\": video sample descriptions would not normally contain this\n",ostypetostr(entry->type));
+						warnprint("Warning: In %s - unknown atom found \"%s\": video sample descriptions would not normally contain this\n",vg.curatompath, ostypetostr(entry->type));
 						//goto bail;
 					}
 				}
@@ -2374,13 +2374,13 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 					}
 					else { 
 						err = badAtomErr;
-						warnprint("Warning: Unknown atom found \"%s\": video sample descriptions would not normally contain this\n",ostypetostr(entry->type));
+						warnprint("Warning: In %s - unknown atom found \"%s\": video sample descriptions would not normally contain this\n",vg.curatompath, ostypetostr(entry->type));
 						//goto bail;
 					}
 				}
 				else { 
 					err = badAtomErr;
-					warnprint("Warning: Unknown atom found \"%s\": video sample descriptions would not normally contain this\n",ostypetostr(entry->type));
+					warnprint("Warning: %s - unknown atom found \"%s\": video sample descriptions would not normally contain this\n",vg.curatompath, ostypetostr(entry->type));
 					// goto bail;
 				}
 				
@@ -3415,7 +3415,7 @@ OSErr Validate_soun_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 			        BAILIFERR( Validate_mhaC_Atom( entry, refcon)); 
 			}
 			
-			else warnprint("Warning: Unknown atom found \"%s\": audio sample descriptions would not normally contain this\n",ostypetostr(entry->type));
+			else warnprint("Warning: In %s - unknown atom found \"%s\": audio sample descriptions would not normally contain this\n",vg.curatompath, ostypetostr(entry->type));
 			
 		}
 		if(vg.cmaf && ((sdh.sdType == 'drmi' ) || (( (sdh.sdType & 0xFFFFFF00) | ' ') == 'enc ' )) && sinfFound!=1)
@@ -4273,7 +4273,7 @@ OSErr Validate_schi_Atom( atomOffsetEntry *aoe, void *refcon )
             break;
             
 			default:
-				warnprint("WARNING: unknown schi atom '%s' length %ld\n",ostypetostr(entry->type), entry->size);
+				warnprint("WARNING: In %s - unknown schi atom '%s' length %ld\n",vg.curatompath, ostypetostr(entry->type), entry->size);
 				break;
 		}
 
@@ -4598,7 +4598,7 @@ OSErr Validate_ipro_Atom( atomOffsetEntry *aoe, void *refcon )
 				--vg.tabcnt; atomprint("</sinf>\n");
 			}				
 			
-			else warnprint("Warning: Unknown atom found \"%s\": ipro atoms would not normally contain this\n",ostypetostr(entry->type));
+			else warnprint("Warning: In %s - unknown atom found \"%s\": ipro atoms would not normally contain this\n",vg.curatompath, ostypetostr(entry->type));
 			
 		}
 	}
@@ -4704,7 +4704,7 @@ OSErr Validate_iinf_Atom( atomOffsetEntry *aoe, void *refcon )
 				--vg.tabcnt; atomprint("</infe>\n");
 			}				
 			
-			else warnprint("Warning: Unknown atom found \"%s\": iinf atoms would not normally contain this\n",ostypetostr(entry->type));
+			else warnprint("Warning: In %s - unknown atom found \"%s\": iinf atoms would not normally contain this\n",vg.curatompath, ostypetostr(entry->type));
 			
 		}
 	}
