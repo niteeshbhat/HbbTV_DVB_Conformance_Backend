@@ -276,7 +276,7 @@ OSErr Validate_iods_OD_Bits( Ptr odDataP, unsigned long odSize, Boolean fileForm
 	
 bail:
 	if (err) {
-		errprint("ValidateIODSAtom: %d\n",err);
+            bailprint("ValidateIODSAtom", err);
 	}
 	return err;
 }
@@ -308,7 +308,7 @@ OSErr Validate_ES_INC_Descriptor(BitBuffer *bb)
 
 bail:
 	if (err) {
-		errprint("Validate_ES_INC_Descriptor: %d\n",err);
+            bailprint("Validate_ES_INC_Descriptor", err);
 	}
 	return err;
 }
@@ -340,7 +340,7 @@ OSErr Validate_ES_REF_Descriptor(BitBuffer *bb)
 
 bail:
 	if (err) {
-		errprint("Validate_ES_REF_Descriptor: %d\n",err);
+            bailprint("Validate_ES_REF_Descriptor", err);
 	}
 	return err;
 }
@@ -426,7 +426,7 @@ OSErr Validate_Dec_conf_Descriptor(BitBuffer *inbb, UInt8 Expect_ObjectType, UIn
 
 bail:
 	if (err) {
-		errprint("Validate_DecConf_Descriptor: %d\n",err);
+            bailprint("Validate_DecConf_Descriptor", err);
 	}
 	return err;
 }
@@ -550,7 +550,7 @@ OSErr Validate_ES_Descriptor(BitBuffer *inbb, UInt8 Expect_ObjectType, UInt8 Exp
 
 bail:
 	if (err) {
-		errprint("Validate_ES_Descriptor: %d\n",err);
+            bailprint("Validate_ES_Descriptor", err);
 	}
 	return err;
 }
@@ -633,7 +633,7 @@ OSErr Validate_Object_Descriptor(BitBuffer *inbb)
 
 bail:
 	if (err) {
-		errprint("Validate_Object_Descriptor: %d\n",err);
+            bailprint("Validate_Object_Descriptor", err);
 	}
 	return err;
 }
@@ -755,7 +755,7 @@ OSErr Validate_SLconf_Descriptor( BitBuffer *inbb, Boolean fileForm)
 
 bail:
 	if (err) {
-		errprint("Validate SLConfigDescriptor: %d\n",err);
+            bailprint("Validate_SLConfigDescriptor", err);
 	}
 	return err;
 }
@@ -822,7 +822,7 @@ OSErr Validate_BIFSSpecificInfo(  BitBuffer *bb, UInt8 objectType )
 	
 bail:
 	if (err) {
-		errprint("Validate_BIFSSpecificInfo: %d\n",err);
+            bailprint("Validate_BIFSSpecificInfo", err);
 	}
 	return err;
 }
@@ -1147,7 +1147,7 @@ OSErr Validate_SoundSpecificInfo(  BitBuffer *bb )
 	
 bail:
 	if (err) {
-		errprint("Validate_SoundSpecificInfo: %d\n",err);
+            bailprint("Validate_SoundSpecificInfo", err);
 	}
 	return err;
 }
@@ -1694,7 +1694,7 @@ OSErr Validate_VideoSpecificInfo(  BitBuffer *bb, UInt32 expect_startcode, UInt8
 
 bail:
 	if (err) {
-		errprint("Validate_VideoSpecificInfo: %d\n",err);
+            bailprint("Validate_VideoSpecificInfo", err);
 	}
 	return err;
 }
