@@ -2228,7 +2228,7 @@ OSErr Validate_NAL_Unit(  BitBuffer *inbb, UInt8 expect_type, UInt32 nal_length 
                                         if(vg.dvb || vg.hbbtv){
                                             float framerate = ((float)time_scale)/((float)(2*num_units_in_tick));
                                             if(vg.framerate != framerate){
-                                                errprint( "Validate_NAL_Unit: The framerate is not matching with out of box framerate value.\n");
+                                                errprint( "Validate_NAL_Unit: The framerate %f is not matching with MPD framerate %f.\n", framerate, vg.framerate);
                                             }
                                         }
 					VALIDATE_FIELD  ("0x%01x", fixed_frame_rate_flag, 1);
@@ -2849,7 +2849,7 @@ OSErr Validate_NAL_Unit_HEVC(  BitBuffer *inbb, UInt8 expect_type, UInt32 nal_le
                                     if(vg.dvb || vg.hbbtv){
                                         float framerate = ((float)vui_time_scale)/((float)(2*vui_num_units_in_tick));
                                         if(vg.framerate != framerate){
-                                            errprint( "Validate_NAL_Unit_HEVC: The framerate is not matching with out of box framerate value.\n");
+                                            errprint( "Validate_NAL_Unit_HEVC: The framerate %f is not matching with MPD framerate %f.\n", framerate, vg.framerate);
                                         }
                                     }
                                     VALIDATE_FIELD  ("%d", vui_poc_proportional_to_timing_flag, 1);
