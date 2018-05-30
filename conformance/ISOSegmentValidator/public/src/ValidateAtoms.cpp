@@ -2341,7 +2341,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 					--vg.tabcnt; atomprint("</colr>\n");
 				}				
 
-				else if (( sdh.sdType == 'avc1' ) || is_protected) 
+				else if (( sdh.sdType == 'avc1' || sdh.sdType == 'avc3') || is_protected) 
 				{
 					if (entry->type == 'avcC') {
 						BAILIFERR( Validate_avcC_Atom( entry, refcon, (char *)"avcC" ) );
