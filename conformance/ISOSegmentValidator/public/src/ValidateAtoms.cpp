@@ -381,15 +381,7 @@ OSErr Validate_tkhd_Atom( atomOffsetEntry *aoe, void *refcon )
 
 
 	// All done
-		// Check whether height and width are matching with those from MPD
-		if(EndianS16_BtoN(EndianS32_NtoB(tkhdHeadCommon.trackWidth)) != vg.width)
-		{ 
-		  errprint("Width in TrackHeaderBox is not matching with out of box width information \n");
-		}
-		if(EndianS16_BtoN(EndianS32_NtoB(tkhdHeadCommon.trackHeight))!= vg.height)
-		{ 
-		  errprint("Height in TrackHeaderBox is not matching with out of box height information \n");
-		}
+		
 		
 	aoe->aoeflags |= kAtomValidated;
 
@@ -2289,6 +2281,16 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 	FieldMustBe( vsdi.depth, 24, "ImageDescription depth must be %d not %d" );
 	FieldMustBe( vsdi.clutID, -1, "ImageDescription clutID must be %d not %d" );
 
+            // Check whether height and width are matching with those from MPD
+		if(vsdi.width != vg.width)
+		{ 
+		  errprint("Width in video sample description (%d) is not matching with the width in the MPD (%d) \n",vsdi.width, vg.width);
+		}
+		if(vsdi.height != vg.height)
+		{ 
+		  errprint("Height in video sample description (%d) is not matching with othe width in the MPD (%d) \n",vsdi.height, vg.height);
+		}
+		
 		// Now we have the Sample Extensions
 		{
 			UInt64 minOffset, maxOffset;

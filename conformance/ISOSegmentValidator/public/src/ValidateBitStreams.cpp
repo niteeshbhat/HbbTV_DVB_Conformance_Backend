@@ -220,12 +220,12 @@ OSErr Validate_iods_OD_Bits( Ptr odDataP, unsigned long odSize, Boolean fileForm
 			(visualProfileLevelIndication!=0xF7) &&
 			(visualProfileLevelIndication!=0x7F))
 			warnprint("Validate_IODS: ISMA expects no-capability(0xFF) or Simple@L0-3 (0x08,01-03) or AdvSimple@L0-3b (0xF0-3,0xF7), or AVC (0x7f) for visualProfileLevelIndication\n");
-		if( visualProfileLevelIndication != vg.visualProfileLevelIndication) {
+		/*if( visualProfileLevelIndication != vg.visualProfileLevelIndication) {
 		  if( vg.visualProfileLevelIndication == 0xFF )
 			errprint("Validate_IODS: visualProfileLevelIndication ( IOD: %lu (0x%2.2x) ) signalled .. but there seems to be no video track\n",visualProfileLevelIndication, visualProfileLevelIndication);
 		  else
 			errprint("Validate_IODS: visualProfileLevelIndication ( IOD: %lu (0x%2.2x )) does not correspond to indication in sample description: %lu (0x%2.2x)\n",visualProfileLevelIndication, visualProfileLevelIndication, vg.visualProfileLevelIndication, vg.visualProfileLevelIndication);
-		}
+		}*/
 
 		VALIDATE_FIELD  ("%2.2x",  graphicsProfileLevelIndication, 8 );
 		if (graphicsProfileLevelIndication!=0xFF)
