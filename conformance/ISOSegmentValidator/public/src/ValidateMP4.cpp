@@ -1067,7 +1067,6 @@ void sampleprinthexandasciidata(char *dataP, UInt32 size)
 
 }
 
-
 void warnprint(const char *formatStr, ...)
 {
 	va_list 		ap;
@@ -1089,6 +1088,36 @@ void errprint(const char *formatStr, ...)
 	vfprintf( _stderr, formatStr, ap );
 	
 	va_end(ap);
+}
+
+void bailprint(const char *level, OSErr errcode)
+{
+    switch(errcode){
+        case -50:
+            errprint("%s: Parameter-related error (out-of-range value, non-conformant type, etc.) for attribute validation\n", level);
+            break;
+        case -2019:
+            errprint("%s: Memory allocation error encountered in attribute validation\n", level);
+            break;
+        case -2020:
+            errprint("%s: Not enough bits left in the bitstream for further attribute validation\n", level);
+            break;
+        case -2021:
+            errprint("%s: Too many bits left in the bitstream after the complete validation\n", level);
+            break;
+        case -2022:
+            errprint("%s: Cannot handle the bad attribute length for attribute validation\n", level);
+            break;
+        case -2023:
+            errprint("%s: Bad attribute size for attribute validation\n", level);
+            break;
+        case -2024:
+            errprint("%s: Bad attribute value for attribute validation\n", level);
+            break;
+        default:
+            errprint("%s: %d\n",level, errcode);
+            break;
+    }
 }
 
 int my_stricmp(const char* p, const char* q)
