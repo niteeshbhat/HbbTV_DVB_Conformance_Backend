@@ -695,6 +695,7 @@ typedef struct ValidateAtomDispatch {
 
 void warnprint(const char *formatStr, ...);
 void errprint(const char *formatStr, ...);
+void bailprint(const char *level, OSErr errcode);
 void atomprinttofile(const char* formatStr, va_list ap);
 void atomprint(const char *formatStr, ...);
 void atomprintnotab(const char *formatStr, ...);
