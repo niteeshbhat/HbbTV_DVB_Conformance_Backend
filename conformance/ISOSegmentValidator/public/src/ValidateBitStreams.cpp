@@ -1829,7 +1829,8 @@ OSErr Validate_AVCConfigRecord( BitBuffer *bb, void *refcon )
 	for (i=0; i< avcHeader.pps_count;  i++) {
 		nal_length = GetBits(bb, 16, &err); if (err) goto bail;
 //		atomprint("nal_length=\"%d\"\n", nal_length  );
-//		
+		if(avcHeader.sps_count == 0)
+                    atomprint(">\n");
 //		/* then call the NALU validate proc */
 		BAILIFERR( Validate_NAL_Unit( bb, nal_PPS, nal_length) );
 		GetBits( bb, nal_length*8, & err);
@@ -1838,7 +1839,9 @@ OSErr Validate_AVCConfigRecord( BitBuffer *bb, void *refcon )
 	if ( (avcHeader.profile  ==  100)  ||  (avcHeader.profile  ==  110)  ||
 		 (avcHeader.profile  ==  122)  ||  (avcHeader.profile  ==  144) ) {		
 		UInt8 reserved1, reserved2, reserved3;
-                //atomprint("<Comment\n");
+                if(avcHeader.sps_count == 0 && avcHeader.pps_count == 0)
+                    atomprint(">\n");
+                atomprint("<Comment1\n");
 		VALIDATE_FIELD_V("%d", reserved1, 6, 0x3F, "AVCConfigRecord");
 		VALIDATE_FIELD("%d", avcHeader.chroma_format, 2);
 
@@ -1850,8 +1853,10 @@ OSErr Validate_AVCConfigRecord( BitBuffer *bb, void *refcon )
 
 		avcHeader.sps_ext_count = GetBits(bb, 8, &err); if (err) goto bail;
 		//atomprint("sps_ext_count=\"%d\"\n", avcHeader.sps_ext_count );
-		//atomprint(">\n");
-
+		atomprint(">\n");
+                if(avcHeader.sps_ext_count == 0)
+                    atomprint("</Comment1>\n");
+                
 		for (i=0; i< avcHeader.sps_ext_count;  i++) {
 			nal_length = GetBits(bb, 16, &err); if (err) goto bail;
 			//atomprint("nal_length=\"%d\"\n", nal_length  );
@@ -1859,6 +1864,7 @@ OSErr Validate_AVCConfigRecord( BitBuffer *bb, void *refcon )
 			/* then call the NALU validate proc */
 			BAILIFERR( Validate_NAL_Unit( bb, nal_SPS_Ext, nal_length) );
 			GetBits( bb, nal_length*8, & err);
+                        atomprint("</Comment1>\n");
 		}
 	} 
 	
