@@ -2314,7 +2314,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 			
 			for (i = 0; i < cnt; i++) {
 				entry = &list[i];
-				
+                                
 				if (entry->type == 'esds') {
 					BAILIFERR( Validate_ESDAtom( entry, refcon, Validate_vide_ES_Bitstream, (char *)"vide_ES" ) );
 				}
@@ -2341,7 +2341,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 					--vg.tabcnt; atomprint("</colr>\n");
 				}				
 
-				else if (( sdh.sdType == 'avc1' || sdh.sdType == 'avc3') || is_protected) 
+				else if ((sdh.sdType == 'avc1' || sdh.sdType == 'avc3') || (is_protected && entry->type != 'hvcC')) 
 				{
 					if (entry->type == 'avcC') {
 						BAILIFERR( Validate_avcC_Atom( entry, refcon, (char *)"avcC" ) );
@@ -2367,7 +2367,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 						//goto bail;
 					}
 				}
-				else if ((( sdh.sdType == 'hev1' ) || ( sdh.sdType == 'hvc1' )) && (vg.cmaf || vg.dvb || vg.hbbtv))
+				else if (((( sdh.sdType == 'hev1' ) || ( sdh.sdType == 'hvc1' )) || is_protected) && (vg.cmaf || vg.dvb || vg.hbbtv))
 				{
 					if (entry->type == 'hvcC') {
 						BAILIFERR( Validate_hvcC_Atom( entry, refcon, (char *)"hvcC" ) );
