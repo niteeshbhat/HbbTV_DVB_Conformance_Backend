@@ -61,7 +61,7 @@ void checkDASHBoxOrder(long cnt, atomOffsetEntry *list, long segmentInfoSize, bo
             if (list[i].offset == offset) {
                 boxAtSegmentStartFound = true;
 
-                if (list[i].type != 'styp' && list[i].type != 'sidx' && list[i].type != 'moof' && (list[i].type != 'ftyp' || initializationSegment)) {
+                if (list[i].type != 'styp' && list[i].type != 'sidx' && list[i].type != 'moof' && list[i].type != 'emsg' && (list[i].type != 'ftyp' || initializationSegment)) {
                     if (list[i].type == 'ftyp' && initializationSegment)
                         warnprint("ftyp box found in the begining of a media segment while initializatioin segment is provided!\n");
                     else
