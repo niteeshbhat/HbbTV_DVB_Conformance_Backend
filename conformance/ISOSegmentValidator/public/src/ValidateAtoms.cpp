@@ -2216,15 +2216,23 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 	char vsdi_name[strlen(vsdi.name)];
 	
 	tir->sampleDescWidth = vsdi.width; tir->sampleDescHeight = vsdi.height;
-	if ((tir->trackWidth>>16) != vsdi.width) {
+	/*if ((tir->trackWidth>>16) != vsdi.width) {
 		warnprint("WARNING: Sample description width %d not the same as track width %s\n",vsdi.width,fixedU32str(tir->trackWidth));
 	}
 	if ((tir->trackHeight>>16) != vsdi.height) {
 		warnprint("WARNING: Sample description height %d not the same as track height %s\n",vsdi.height,fixedU32str(tir->trackHeight));
-	}
+	}*/
 	if ((vsdi.width==0) || (vsdi.height==0)) {
 		errprint("Visual Sample description height (%d) or width (%d) zero\n",vsdi.height,vsdi.width);
 	}
+	if(vg.width != 0 && vg.height != 0){
+            if((vg.width * vg.sarx)/vg.sary != (tir->trackWidth>>16)){
+                errprint("Track header box width %s is not matching the MPD width %d on a grid determined by the @sar attribute %d:%d.\n",fixedU32str(tir->trackWidth), vg.width, vg.sarx, vg.sary);
+            }
+            if((vg.height * vg.sary)/vg.sarx != (tir->trackHeight>>16)){
+                errprint("Track header box height %s is not matching the MPD height %d on a grid determined by the @sar attribute %d:%d.\n",fixedU32str(tir->trackHeight), vg.height, vg.sarx, vg.sary);
+            }
+        }
 	
 	vsdi.hRes = EndianU32_BtoN(vsdi.hRes);
 	vsdi.vRes = EndianU32_BtoN(vsdi.vRes);
