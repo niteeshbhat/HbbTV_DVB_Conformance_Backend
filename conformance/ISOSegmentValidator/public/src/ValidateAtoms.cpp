@@ -2196,7 +2196,7 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 	UInt64 offset;
 	SampleDescriptionHead sdh;
 	VideoSampleDescriptionInfo vsdi;
-	
+	OSErr atomerr = noErr;
 	offset = aoe->offset;
 
 	// Get data 
@@ -2352,7 +2352,8 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 				else if ((sdh.sdType == 'avc1' || sdh.sdType == 'avc3') || (is_protected && entry->type != 'hvcC')) 
 				{
 					if (entry->type == 'avcC') {
-						BAILIFERR( Validate_avcC_Atom( entry, refcon, (char *)"avcC" ) );
+						atomerr= Validate_avcC_Atom( entry, refcon, (char *)"avcC" );
+                                                if (!err) err = atomerr;
 					}
 					else if (entry->type == 'svcC') {
 						BAILIFERR( Validate_avcC_Atom( entry, refcon, (char *)"svcC" ) );
@@ -2378,7 +2379,8 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 				else if (((( sdh.sdType == 'hev1' ) || ( sdh.sdType == 'hvc1' )) || is_protected) && (vg.cmaf || vg.dvb || vg.hbbtv))
 				{
 					if (entry->type == 'hvcC') {
-						BAILIFERR( Validate_hvcC_Atom( entry, refcon, (char *)"hvcC" ) );
+						atomerr= Validate_hvcC_Atom( entry, refcon, (char *)"hvcC" );
+                                                if (!err) err = atomerr;
 					}
 					else { 
 						err = badAtomErr;
