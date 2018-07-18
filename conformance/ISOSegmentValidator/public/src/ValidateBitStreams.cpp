@@ -2692,7 +2692,7 @@ OSErr Validate_NAL_Unit_HEVC(  BitBuffer *inbb, UInt8 expect_type, UInt32 nal_le
                                 VALIDATE_UEV( "%d", conf_win_bottom_offset);
                             }
                             
-                            VALIDATE_UEV( "%d", bit_depth_luma_minus8);
+                            VALIDATE_UEV( "%lu", bit_depth_luma_minus8);
                             VALIDATE_UEV( "%d", bit_depth_chroma_minus8);
                             VALIDATE_UEV( "%d", log2_max_pic_order_cnt_lsb_minus4);
                             VALIDATE_FIELD  ("%d", sps_sub_layer_ordering_info_present_flag, 1);
@@ -2850,10 +2850,10 @@ OSErr Validate_NAL_Unit_HEVC(  BitBuffer *inbb, UInt8 expect_type, UInt32 nal_le
                                 }
                                 VALIDATE_FIELD  ("%d", vui_timing_info_present_flag, 1);
                                 if(vui_timing_info_present_flag){
-                                    VALIDATE_FIELD  ("%d", vui_num_units_in_tick, 32);
-                                    VALIDATE_FIELD  ("%d", vui_time_scale, 32);
+                                    VALIDATE_FIELD  ("%lu", vui_num_units_in_tick, 32);
+                                    VALIDATE_FIELD  ("%ld", vui_time_scale, 32);
                                     if(vg.dvb || vg.hbbtv){
-                                        float framerate = ((float)vui_time_scale)/((float)(2*vui_num_units_in_tick));
+                                        float framerate = ((float)vui_time_scale)/((float)(vui_num_units_in_tick));
                                         if(vg.framerate != framerate){
                                             errprint( "HbbTV-DVB DASH Validation Requirements check violated: Section 'Codec information' - Validate_NAL_Unit_HEVC: The framerate %f is not matching with MPD framerate %f.\n", framerate, vg.framerate);
                                         }
