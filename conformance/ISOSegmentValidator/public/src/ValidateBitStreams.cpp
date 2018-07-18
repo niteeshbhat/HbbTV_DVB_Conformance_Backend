@@ -1787,9 +1787,9 @@ OSErr Validate_AVCConfigRecord( BitBuffer *bb, void *refcon )
 	
         if(vg.dvb || vg.hbbtv){
             if(vg.codecprofile != avcHeader.profile)
-                errprint( "DVB/HbbTV check violated: Validate_AVCConfigRecord: The codec profile is not matching with out of box codec profile value.\n");
+                errprint( "HbbTV-DVB DASH Validation Requirements check violated: Section 'Codec information' - Validate_AVCConfigRecord: The codec profile is not matching with out of box codec profile value.\n");
             if(vg.codeclevel != avcHeader.level)
-                errprint( "DVB/HbbTV check violated: Validate_AVCConfigRecord: The codec level is not matching with out of box codec level value.\n");
+                errprint( "HbbTV-DVB DASH Validation Requirements check violated: Section 'Codec information' - Validate_AVCConfigRecord: The codec level is not matching with out of box codec level value.\n");
         }
         
 	Validate_level_IDC(avcHeader.profile, avcHeader.level, constraint_set3_flag);
@@ -2234,7 +2234,7 @@ OSErr Validate_NAL_Unit(  BitBuffer *inbb, UInt8 expect_type, UInt32 nal_length 
                                         if(vg.dvb || vg.hbbtv){
                                             float framerate = ((float)time_scale)/((float)(2*num_units_in_tick));
                                             if(vg.framerate != framerate){
-                                                errprint( "DVB/HbbTV check violated: Validate_NAL_Unit: The framerate %f is not matching with MPD framerate %f.\n", framerate, vg.framerate);
+                                                errprint( "HbbTV-DVB DASH Validation Requirements check violated: Section 'Codec information' - Validate_NAL_Unit: The framerate %f is not matching with MPD framerate %f.\n", framerate, vg.framerate);
                                             }
                                         }
 					VALIDATE_FIELD  ("0x%01x", fixed_frame_rate_flag, 1);
@@ -2855,7 +2855,7 @@ OSErr Validate_NAL_Unit_HEVC(  BitBuffer *inbb, UInt8 expect_type, UInt32 nal_le
                                     if(vg.dvb || vg.hbbtv){
                                         float framerate = ((float)vui_time_scale)/((float)(2*vui_num_units_in_tick));
                                         if(vg.framerate != framerate){
-                                            errprint( "DVB/HbbTV check violated: Validate_NAL_Unit_HEVC: The framerate %f is not matching with MPD framerate %f.\n", framerate, vg.framerate);
+                                            errprint( "HbbTV-DVB DASH Validation Requirements check violated: Section 'Codec information' - Validate_NAL_Unit_HEVC: The framerate %f is not matching with MPD framerate %f.\n", framerate, vg.framerate);
                                         }
                                     }
                                     VALIDATE_FIELD  ("%d", vui_poc_proportional_to_timing_flag, 1);
@@ -3897,9 +3897,9 @@ OSErr Validate_HEVCConfigRecord( BitBuffer *bb, void *refcon )
         
         if(vg.dvb || vg.hbbtv){
             if(vg.codecprofile != hevcHeader.profile_idc)
-                errprint( "DVB/HbbTV check violated: Validate_HEVCConfigRecord: The codec profile is not matching with out of box codec profile value.\n");
+                errprint( "HbbTV-DVB DASH Validation Requirements check violated: Section 'Codec information' - Validate_HEVCConfigRecord: The codec profile is not matching with out of box codec profile value.\n");
             if(vg.codectier != hevcHeader.tier_flag || vg.codeclevel != hevcHeader.level_idc)
-                errprint( "DVB/HbbTV check violated: Validate_HEVCConfigRecord: The codec level is not matching with out of box codec level value.\n");
+                errprint( "HbbTV-DVB DASH Validation Requirements check violated: Section 'Codec information' - Validate_HEVCConfigRecord: The codec level is not matching with out of box codec level value.\n");
         }
         
         hevcHeader.min_spatial_segmentation_idc      = GetBits(bb, 16, &err); if (err) goto bail;
