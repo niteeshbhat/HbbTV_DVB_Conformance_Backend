@@ -2226,11 +2226,10 @@ OSErr Validate_vide_SD_Entry( atomOffsetEntry *aoe, void *refcon )
 		errprint("Visual Sample description height (%d) or width (%d) zero\n",vsdi.height,vsdi.width);
 	}
 	if(vg.width != 0 && vg.height != 0){
-            if((vg.width * vg.sarx)/vg.sary != (tir->trackWidth>>16)){
-                errprint("Track header box width %s is not matching the MPD width %d on a grid determined by the @sar attribute %d:%d.\n",fixedU32str(tir->trackWidth), vg.width, vg.sarx, vg.sary);
-            }
-            if((vg.height * vg.sary)/vg.sarx != (tir->trackHeight>>16)){
-                errprint("Track header box height %s is not matching the MPD height %d on a grid determined by the @sar attribute %d:%d.\n",fixedU32str(tir->trackHeight), vg.height, vg.sarx, vg.sary);
+            float mpd_ratio = ((float)(vg.width * vg.sarx))/((float)(vg.height * vg.sary));
+            float tkhd_ratio = ((float)(tir->trackWidth>>16))/((float)(tir->trackHeight>>16));
+            if(mpd_ratio != tkhd_ratio){
+                errprint("Track header box width:height %s:%s is not matching the MPD width:height %d:%d on a grid determined by the @sar attribute %d:%d.\n",fixedU32str(tir->trackWidth), fixedU32str(tir->trackHeight), vg.width, vg.height, vg.sarx, vg.sary);
             }
         }
 	
