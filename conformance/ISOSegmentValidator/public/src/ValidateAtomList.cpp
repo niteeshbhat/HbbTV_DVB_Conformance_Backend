@@ -1083,7 +1083,7 @@ OSErr ValidateAtomOfType( OSType theType, long flags, ValidateAtomTypeProcPtr va
 			  
 			addAtomToPath( vg.curatompath, theType, typeCnt, curatompath );
 			if (vg.print_atompath) {
-				fprintf(stdout,"%s\n", vg.curatompath);
+				fprintf(stdout,"%c\n", vg.curatompath);
 			}
 			curatomprint = vg.printatom;
 			cursampleprint = vg.printsample;
