@@ -1841,21 +1841,18 @@ OSErr Validate_AVCConfigRecord( BitBuffer *bb, void *refcon )
 		UInt8 reserved1, reserved2, reserved3;
                 if(avcHeader.sps_count == 0 && avcHeader.pps_count == 0)
                     atomprint(">\n");
-                atomprint("<Comment1\n");
-		VALIDATE_FIELD_V("%d", reserved1, 6, 0x3F, "AVCConfigRecord");
-		VALIDATE_FIELD("%d", avcHeader.chroma_format, 2);
-
-		VALIDATE_FIELD_V("%d", reserved2, 5, 0x1F, "AVCConfigRecord");
-		VALIDATE_FIELD("%d", avcHeader.bit_depth_luma_minus8, 3);
+                
+                reserved1 = GetBits(bb, 6, &err); if (err) goto bail;
+                avcHeader.chroma_format = GetBits(bb, 2, &err); if(err) goto bail;
+        
+                reserved2 = GetBits(bb, 5, &err); if (err) goto bail;
+                avcHeader.bit_depth_luma_minus8 = GetBits(bb, 3, &err); if(err) goto bail;
+        
+                reserved3 = GetBits(bb, 5, &err); if (err) goto bail;
+                avcHeader.bit_depth_chroma_minus8 = GetBits(bb, 3, &err); if(err) goto bail;
 		
-		VALIDATE_FIELD_V("%d", reserved3, 5, 0x1F, "AVCConfigRecord");
-		VALIDATE_FIELD("%d", avcHeader.bit_depth_chroma_minus8, 3);
-
 		avcHeader.sps_ext_count = GetBits(bb, 8, &err); if (err) goto bail;
 		//atomprint("sps_ext_count=\"%d\"\n", avcHeader.sps_ext_count );
-		atomprint(">\n");
-                if(avcHeader.sps_ext_count == 0)
-                    atomprint("</Comment1>\n");
                 
 		for (i=0; i< avcHeader.sps_ext_count;  i++) {
 			nal_length = GetBits(bb, 16, &err); if (err) goto bail;
@@ -1864,7 +1861,6 @@ OSErr Validate_AVCConfigRecord( BitBuffer *bb, void *refcon )
 			/* then call the NALU validate proc */
 			BAILIFERR( Validate_NAL_Unit( bb, nal_SPS_Ext, nal_length) );
 			GetBits( bb, nal_length*8, & err);
-                        atomprint("</Comment1>\n");
 		}
 	} 
 	
