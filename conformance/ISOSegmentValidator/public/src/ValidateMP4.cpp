@@ -797,7 +797,7 @@ void loadOffsetInfo(char *offsetsFileName)
     vg.offsetEntries = (OffsetInfo *)malloc(vg.numOffsetEntries*sizeof(OffsetInfo));
     if(vg.offsetEntries == NULL)
     {
-        printf("Failure to allocate %d offset entries, exiting!\n",vg.numOffsetEntries);
+        printf("Failure to allocate %u offset entries, exiting!\n",vg.numOffsetEntries);
         exit(-1);
     }
 
@@ -1223,9 +1223,9 @@ char *int64todstr(UInt64 num)
 	lo = num&(0xffffffff);
 	
 	if (hi) 
-		sprintf(str,"%ld%8.8ld",hi,lo);
+		sprintf(str,"%lu%8.8lu",hi,lo);
 	else
-		sprintf(str,"%ld",lo);
+		sprintf(str,"%lu",lo);
 	return str;
 }
 
@@ -1238,9 +1238,9 @@ char *int64todstr_r(UInt64 num, char * str)
 	lo = num&(0xffffffff);
 	
 	if (hi) 
-		sprintf(str,"%ld%8.8ld",hi,lo);
+		sprintf(str,"%lu%8.8lu",hi,lo);
 	else
-		sprintf(str,"%ld",lo);
+		sprintf(str,"%lu",lo);
 	return str;
 }
 
